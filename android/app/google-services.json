@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "318699652408",
+    "project_id": "familien-pedersen-app",
+    "storage_bucket": "familien-pedersen-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:318699652408:android:4343b9f4d82bc7085dadcd",
+        "android_client_info": {
+          "package_name": "com.example.familien_pedersen_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "318699652408-qqt9jf2n2mil70444u8nuq4llie8312o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgfJXKLc3EzqQ4PZfQSdvlQcgOqc9n2Lo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "318699652408-qqt9jf2n2mil70444u8nuq4llie8312o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
