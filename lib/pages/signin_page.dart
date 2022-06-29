@@ -1,11 +1,15 @@
-import 'package:familien_pedersen_app/pages/signup_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:familien_pedersen_app/main.dart';
 import 'package:flutter/gestures.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SignInPage extends StatefulWidget {
-  const SignInPage({Key? key}) : super(key: key);
+  final VoidCallback onClickedSignUp;
+
+  const SignInPage({
+    Key? key,
+    required this.onClickedSignUp,
+  }) : super(key: key);
 
   @override
   State<SignInPage> createState() => _SignInPageState();
@@ -63,12 +67,7 @@ class _SignInPageState extends State<SignInPage> {
                         children: [
                       TextSpan(
                         recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            Navigator.of(context).pushAndRemoveUntil(
-                                MaterialPageRoute(
-                                    builder: (context) => const SignUpPage()),
-                                (Route<dynamic> route) => false);
-                          },
+                          ..onTap = widget.onClickedSignUp,
                         text: 'Opret konto',
                         style: TextStyle(
                           color: Theme.of(context).primaryColor,
@@ -93,6 +92,8 @@ class _SignInPageState extends State<SignInPage> {
       );
     } on FirebaseAuthException catch (e) {
       print(e);
+
+      utilsInstance.showSnackBar(e.message);
     }
 
     navigatorKey.currentState!.popUntil((route) => route.isFirst);
