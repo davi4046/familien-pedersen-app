@@ -1,6 +1,6 @@
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:expandable/expandable.dart';
-import 'foodplan_creation_page.dart';
+import 'package:familien_pedersen_app/classes.dart';
 import 'package:flutter/material.dart';
 
 final List<Dish> _dishes = [
