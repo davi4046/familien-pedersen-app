@@ -1,26 +1,6 @@
-import 'dart:math';
 import 'dish_selection_page.dart';
+import 'package:familien_pedersen_app/classes.dart';
 import 'package:flutter/material.dart';
-
-class Dish {
-  Dish({required this.title, required this.time});
-
-  final String title;
-  final String time;
-  List<Dish> accompaniment = [];
-}
-
-class WeekDay {
-  WeekDay({
-    this.isExpanded = false,
-    required this.header,
-  });
-
-  bool isExpanded;
-  final String header;
-  TimeOfDay dinnerTime = TimeOfDay(hour: 19, minute: 0);
-  List<Dish> dishes = [];
-}
 
 List<WeekDay> _weekDays = [
   WeekDay(header: 'Mandag'),
@@ -33,7 +13,6 @@ List<WeekDay> _weekDays = [
 ];
 
 late int _selWeekDayIndex;
-late int _selDishIndex;
 
 class FoodplanCreationPage extends StatefulWidget {
   const FoodplanCreationPage({Key? key}) : super(key: key);
@@ -46,6 +25,10 @@ class _FoodplanCreationPageState extends State<FoodplanCreationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        child: const Icon(Icons.save),
+      ),
       appBar: AppBar(
         title: const Text('Opret madplan'),
       ),
@@ -80,7 +63,7 @@ class _FoodplanCreationPageState extends State<FoodplanCreationPage> {
 }
 
 class WeekDayBody extends StatefulWidget {
-  WeekDayBody({Key? key, required this.index}) : super(key: key);
+  const WeekDayBody({Key? key, required this.index}) : super(key: key);
   final int index;
 
   @override
@@ -216,76 +199,80 @@ class _WeekDayBodyState extends State<WeekDayBody> {
     );
 
     if (selectedDish != null) {
-      setState(() => _weekDays[_selWeekDayIndex].dishes.add(selectedDish));
+      final newDish = selectedDish.clone();
+
+      setState(() => _weekDays[_selWeekDayIndex].dishes.add(newDish));
     }
   }
 
   List<Dismissible> _buildDishes() {
-    return _weekDays[widget.index].dishes.map((dish) {
-      return Dismissible(
-        background: Container(
-          color: Colors.red,
-          child: Icon(
-            Icons.delete,
-            color: Theme.of(context).canvasColor,
-          ),
-        ),
-        direction: DismissDirection.startToEnd,
-        key: ValueKey(getRandomString(10)),
-        onDismissed: (direction) {
-          setState(() {
-            _weekDays[widget.index]
-                .dishes
-                .removeAt(_weekDays[widget.index].dishes.indexOf(dish));
-          });
-        },
-        child: ListTile(
-          key: ValueKey(getRandomString(10)),
-          title: Text(dish.title),
-          subtitle: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: _weekDays[widget.index]
-                .dishes[_weekDays[widget.index].dishes.indexOf(dish)]
-                .accompaniment
-                .map((acc) {
-              return InkWell(
-                onLongPress: () => setState(() {_weekDays[widget.index]
-                    .dishes[_weekDays[widget.index].dishes.indexOf(dish)]
-                    .accompaniment
-                    .remove(acc);}),
-                child: Text(acc.title),
-              );
-            }).toList(),
-          ),
-          trailing: TextButton(
-            onPressed: () async {
-              _selDishIndex = _weekDays[widget.index].dishes.indexOf(dish);
+    return _weekDays[widget.index]
+        .dishes
+        .asMap()
+        .map((dishIndex, dish) {
+          return MapEntry(
+            dishIndex,
+            Dismissible(
+              key: UniqueKey(),
+              direction: DismissDirection.startToEnd,
+              background: Container(
+                color: Colors.red,
+                child: Icon(
+                  Icons.delete,
+                  color: Theme.of(context).canvasColor,
+                ),
+              ),
+              onDismissed: (direction) {
+                setState(() {
+                  _weekDays[widget.index].dishes.remove(dish);
+                });
+              },
+              child: ListTile(
+                minVerticalPadding: 18, // Centers title vertically
+                title: Text(dish.title),
+                subtitle: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: _weekDays[widget.index]
+                      .dishes[dishIndex]
+                      .subDishes
+                      .map((subDish) {
+                    return InkWell(
+                      onLongPress: () => setState(() {
+                        _weekDays[widget.index]
+                            .dishes[dishIndex]
+                            .subDishes
+                            .remove(subDish);
+                      }),
+                      child: Text(subDish.title),
+                    );
+                  }).toList(),
+                ),
+                trailing: TextButton(
+                  onPressed: () async {
+                    final selectedSubDish = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const DishSelectionPage()),
+                    );
 
-              final selAcc = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const DishSelectionPage()),
-              );
+                    if (selectedSubDish != null) {
+                      final newSubDish = selectedSubDish.clone();
 
-              if (selAcc != null) {
-                setState(() => _weekDays[widget.index]
-                    .dishes[_selDishIndex]
-                    .accompaniment
-                    .add(selAcc));
-              }
-            },
-            child: const Text('Tilføj tilbehør'),
-          ),
-        ),
-      );
-    }).toList();
+                      setState(() => _weekDays[widget.index]
+                          .dishes[dishIndex]
+                          .subDishes
+                          .add(newSubDish));
+                    }
+                  },
+                  child: const Text('Tilføj tilbehør'),
+                ),
+              ),
+            ),
+          );
+        })
+        .values
+        .toList();
   }
 }
-
-const _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
-Random _rnd = Random();
-
-String getRandomString(int length) => String.fromCharCodes(Iterable.generate(
-    length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
